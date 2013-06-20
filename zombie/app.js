@@ -1,16 +1,18 @@
 var express = require('express');
-var socket = require('socket.io');
 var app = express();
-var io = socket.listen(app);
+app.use(express.static(__dirname + '/public'));
+var server = require('http').createServer(app);
+var io = require('socket.io').listen(server);
 
-io.sockets.on('connection', function(client){
-  console.log('client connected...');
+server.listen(8080);
+
+app.get('/', function (req, res) {
+  res.sendfile(__dirname + '/public/index.html');
 });
 
-
-//app.get('/', function(req, res){
-//  res.send('Hello World');
-//});
-
-//app.listen(8080);
-//console.log('Listening on port 8080');
+io.sockets.on('connection', function (client) {
+  client.emit('news', { hello: 'world' });
+  client.on('my other event', function (data) {
+    console.log(data);
+  });
+});
